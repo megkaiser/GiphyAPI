@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+<head>
+    <meta charset="utf-8">
+    <title>Giphy API Project</title>
+</head>
+
+<body>
+    <div class="container">
+        <div id="buttons-view"></div>
+        <form id="tvCharacter-form">
+            <label>Add a TV Character</label>
+            <input type="text" id="tvCharacter-input">
+            <br>
+            <input id="add-tv-character" type="submit" value="Add a TV Character">
+        </form>
+        <div id="tv-characters-view"></div>
+        <script src="http://code.jquery.com/jquery-2.1.3.min.js"></script>
+        <script type="text/javascript">
+        var tvCharacters = ["Michael Scott", "Leslie Knope", "Liz Lemon", "Chandler Bing"];
+
+        function displayGIF() {
+            var tvCharacter = $(this).attr("data-name");
+            var queryURL = "http://api.giphy.com/v1/gifs/search?q=" + tvCharacter + "&api_key=dc6zaTOxFJmzC";
+            $.ajax({
+                url: queryURL,
+                method: 'GET'
+            }).done(function(response) {
+                console.log(response);
+                // Create a div to hold the character GIF
+                var results = response.data;
+                $("#tv-characters-view").empty();
+                for (var i = 0; i < results.length; i++) {
+                    var tvCharDiv = $("<div>");
+                    var tvCharImg = $("<img>").addClass("gif");
+                    tvCharImg.attr("src", results[i].images.fixed_height_still.url);
+                    tvCharImg.attr("data-still", results[i].images.fixed_height_still.url);
+                    tvCharImg.attr("data-animate", results[i].images.fixed_height.url);
+                    tvCharImg.attr("data-state", "still");
+                    tvCharDiv.append(tvCharImg);
+                    $("#tv-characters-view").append(tvCharDiv);
+                }
+                $(".gif").on("click", function() {
+
+                    var state = $(this).attr("data-state");
+                    console.log("state")
+                    if (state === "still") {
+                        $(this).attr("src", $(this).attr("data-animate"));
+                        $(this).attr("data-state", "animate");
+                    } else {
+                        $(this).attr("src", $(this).attr("data-still"));
+                        $(this).attr("data-state", "still");
+                    }
+                });
+
+            });
+
+        }
+
+        function renderButtons() {
+            $("#buttons-view").empty();
+            for (var i = 0; i < tvCharacters.length; i++) {
+                var a = $("<button>");
+                a.addClass("tvCharacter");
+                a.attr("data-name", tvCharacters[i]);
+                a.text(tvCharacters[i]);
+                $("#buttons-view").append(a);
+            }
+        }
+
+        $("#add-tv-character").on("click", function(event) {
+            console.log("eyyy")
+            event.preventDefault();
+            var tvCharacter = $("#tvCharacter-input").val().trim();
+            tvCharacters.push(tvCharacter);
+            renderButtons();
+        });
+
+        $(document).on("click", ".tvCharacter", displayGIF);
+
+
+
+        renderButtons();
+        </script>
+</body>
+
+</html>
